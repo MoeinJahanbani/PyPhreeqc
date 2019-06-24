@@ -1,291 +1,318 @@
 from ctypes import *
 import numpy as np
-libc = CDLL('../libs/libphreeqcrm.so')
+import pandas as pd
+import sys
+libc = CDLL('/home/moein/PhreeqcPythonWrapper/Fipy/example/PyPhreeqc/libs/libphreeqcrm-3.5.0.so')
+#srcPath = os.path.join(os.path.dirname(__file__),'..')
+#sys.path.append('/home/moein/PhreeqcPythonWrapper/PyPhreeqc/src/@IRM_RESULT')
+from IRM_RESULT import *
+def DECODER(array):
+    DecodedArray = np.zeros((1,array.size),dtype='|S20')
+    for i in range(array.size):
+        DecodedArray[0,i]=array[i].encode()
+    return DecodedArray
+class PhreeqcRM:
+    def __init__(self,nxyz,n_threads):
+        self.nxyz = nxyz
+        self.n_threads = n_threads
+        self.id = libc.RM_Create(nxyz,n_threads)
+    def RM_Abort(self,result,err_str):
+        return IRM_RESULT(libc.RM_Abort(self.id,result,err_str))
 
-def RM_Abort(id,result,err_str):
-    return (libc.RM_Abort(id,result,err_str))
+    def RM_CloseFiles(self):
+        return libc.RM_CloseFiles(self)
 
-def RM_CloseFiles(id):
-    return libc.RM_CloseFiles(id)
+    def RM_Concentrations2Utility(self,c,n,tc,p_atm):
+        return libc.RM_Concentrations2Utility(self.id,c,n,tc,p_atm)
 
-def RM_Concentrations2Utility(id,c,n,tc,p_atm):
-    return libc.RM_Concentrations2Utility(id,c,n,tc,p_atm)
+    def RM_CreateMapping(self,grid2chem):
+        return libc.RM_CreateMapping(self.id,grid2chem.ctypes)
 
+    def RM_DecodeError(self,e):
+        return libc.RM_DecodeError(self.id,e)
 
-def RM_Create(nxyz,n_threads):
-#    if not(is_int(nxyz) or is_int(n_threads)):
-#        raise Exception('nxyz and n_threads should be integers')
-    return libc.RM_Create(nxyz,n_threads)
+    def RM_Destroy(self):
+        return libc.RM_Destroy(self.id)
 
-def RM_CreateMapping(id,grid2chem):
-    return libc.RM_CreateMapping(id,grid2chem.ctypes)
+    def RM_DumpModule(self,dump_on,append):
+        return libc.RM_DumpModule(self.id,dump_on,append)
 
-def RM_DecodeError(id,e):
-    return libc.RM_DecodeError(id,e)
+    def RM_ErrorMessage(self,errstr):
+        return libc.RM_ErrorMessage(self.id,errstr)
 
-def RM_Destroy(id):
-    return libc.RM_Destroy(id)
+    def RM_FindComponents(self):
+        return libc.RM_FindComponents(self.id)
 
-def RM_DumpModule(id,dump_on,append):
-    return libc.RM_DumpModule(id,dump_on,append)
+    def RM_GetBackwardMapping(self,n,list,size):
+        return libc.RM_GetBackwardMapping(self.id,n,list,size)
 
-def RM_ErrorMessage(id,errstr):
-    return libc.RM_ErrorMessage(id,errstr)
+    def RM_GetChemistryCellCount(self):
+        return libc.RM_GetChemistryCellCount(self.id)
 
-def RM_FindComponents(id):
-    return libc.RM_FindComponents(id)
+    def RM_GetComponent(self,num,chem_name,l):
+        String = create_string_buffer(l)
+        status = libc.RM_GetComponent(self.id,num,String,l)
+        chem_name[num] = String.value.decode()
+        return status
 
-def RM_GetBackwardMapping(id,n,list,size):
-    return libc.RM_GetBackwardMapping(id,n,list,size)
+    def RM_GetConcentrations(self,c):
+        return libc.RM_GetConcentrations(self.id,c.ctypes)
 
-def RM_GetChemistryCellCount(id):
-    return libc.RM_GetChemistryCellCount(id)
+    def RM_GetDensity(self,density):
+        return libc.RM_GetDensity(self.id,density.ctypes)
 
-def RM_GetComponent(id,num,chem_name,l):
-    String = create_string_buffer(l)
-    status = libc.RM_GetComponent(id,num,String,l)
-    chem_name[num] = String.value.decode()
-    return status
+    def RM_GetEndCell(self,ec):
+        return libc.RM_GetEndCell(self.id,ec)
 
-def RM_GetConcentrations(id,c):
-    return libc.RM_GetConcentrations(id,c.ctypes)
+    def RM_GetEquilibriumPhaseCount(self):
+        return libc.RM_GetEquilibriumPhaseCount(self.id)
+    def RM_GetEquilibriumPhaseName(self,num,name,l1):
+        return libc.RM_GetEquilibriumPhaseName(self.id,num,name,l1)
+    def RM_GetErrorString(self,errstr,l):
+        return libc.RM_GetErrorString(self.id,errstr,l)
+    def RM_GetErrorStringLength(self):
+        return libc.RM_GetErrorStringLength(self.id)
+    def RM_GetExchangeName(self,num,name,l1):
+        return libc.RM_GetExchangeName(self.id,num,name,l1)
 
-def RM_GetDensity(id,density):
-    return libc.RM_GetDensity(id,density.ctypes)
+    def RM_GetExchangeSpeciesCount(self):
+        return libc.RM_GetExchangeSpeciesCount(self.id)
 
-def RM_GetEndCell(id,ec):
-    return libc.RM_GetEndCell(id,ec)
+    def RM_GetExchangeSpeciesName(self,num,name,l1):
+        return libc.RM_GetExchangeSpeciesName(self.id,num,name,l1)
 
-def RM_GetEquilibriumPhaseCount(id):
-    return libc.RM_GetEquilibriumPhaseCount(id)
-def RM_GetEquilibriumPhaseName(id,num,name,l1):
-    return libc.RM_GetEquilibriumPhaseName(id,num,name,l1)
-def RM_GetErrorString(id,errstr,l):
-    return libc.RM_GetErrorString(id,errstr,l)
-def RM_GetErrorStringLength(id):
-    return libc.RM_GetErrorStringLength(id)
-def RM_GetExchangeName(id,num,name,l1):
-    return libc.RM_GetExchangeName(id,num,name,l1)
+    def RM_GetFilePrefix(self,prefix,l):
+        return libc.RM_GetFilePrefix(self.id,prefix.encode(),l)
+    def RM_GetGasComponentsCount(self):
+        return libc.RM_GetGasComponentsCount(self.id)
 
-def RM_GetExchangeSpeciesCount(id):
-    return libc.RM_GetExchangeSpeciesCount(id)
+    def RM_GetGasComponentsName(self,nun,name,l1):
+        return libc.RM_GetGasComponentsName(self.id,nun,name,l1)
 
-def RM_GetExchangeSpeciesName(id,num,name,l1):
-    return libc.RM_GetExchangeSpeciesName(id,num,name,l1)
+    def RM_GetGfw(self,gfw):
+        return libc.RM_GetGfw(self.id,gfw.ctypes)
 
-def RM_GetFilePrefix(id,prefix,l):
-    return libc.RM_GetFilePrefix(id,prefix.encode(),l)
-def RM_GetGasComponentsCount(id):
-    return libc.RM_GetGasComponentsCount(id)
+    def RM_GetGridCellCount(self):
+        return libc.RM_GetGridCellCount(self.id)
 
-def RM_GetGasComponentsName(id,nun,name,l1):
-    return libc.RM_GetGasComponentsName(id,nun,name,l1)
+    def RM_GetIPhreeqcId(self,i):
+        return libc.RM_GetIPhreeqcId(self.id,i)
 
-def RM_GetGfw(nxyz,gfw):
-    return libc.RM_GetGfw(nxyz,gfw.ctypes)
+    def RM_GetKineticReactionsCount(self):
+        return libc.RM_GetKineticReactionsCount(self.id)
 
-def RM_GetGridCellCount(id):
-    return libc.RM_GetGridCellCount(id)
+    def RM_GetKineticReactionsName(self,num,name,l1):
+        return libc.RM_GetKineticReactionsName(self.id,num,name,l1)
 
-def RM_GetIPhreeqcId(id,i):
-    return libc.RM_GetIPhreeqcId(id,i)
+    def RM_GetMpiMyself(self):
+        return libc.RM_GetMpiMyself(self.id)
 
-def RM_GetKineticReactionsCount(id):
-    return libc.RM_GetKineticReactionsCount(id)
+    def RM_GetMpiTasks(self):
+        return libc.RM_GetMpiTasks(self.id)
 
-def RM_GetKineticReactionsName(id,num,name,l1):
-    return libc.RM_GetKineticReactionsName(id,num,name,l1)
+    def RM_GetNthSelectedOutputUserNumber(self,n):
+        return libc.RM_GetNthSelectedOutputUserNumber(self.id,n)
 
-def RM_GetMpiMyself(id):
-    return libc.RM_GetMpiMyself(id)
+    def RM_GetSaturation(self,sat_calc):
+        return libc.M_GetSaturation(self.id,sat_calc)
 
-def RM_GetMpiTasks(id):
-    return libc.RM_GetMpiTasks(id)
+    def RM_GetSelectedOutput(self,so):
+        return libc.RM_GetSelectedOutput(self.id,so.ctypes)
+    def RM_GetNthSelectedOutputColumnCount(self):
+        return libc.RM_GetNthSelectedOutputColumnCount(self.id)
 
-def RM_GetNthSelectedOutputUserNumber(id,n):
-    return libc.RM_GetNthSelectedOutputUserNumber(id,n)
+    def RM_GetSelectedOutputCount(self):
+        return libc.RM_GetSelectedOutputCount(self.id)
 
-def RM_GetSaturation(id,sat_calc):
-    return libc.M_GetSaturation(id,sat_calc)
+    def RM_GetSelectedOutputHeading(self,num,headings,l):
+        String = create_string_buffer(l)
+        status = libc.RM_GetSelectedOutputHeading(self.id,icol,String,l)
+        headings[num] = String.value.decode()
+        return status
+    def RM_GetSelectedOutputColumnCount(self):
+        return libc.RM_GetSelectedOutputColumnCount(self.id)
 
-def RM_GetSelectedOutput(id,so):
-    return libc.RM_GetSelectedOutput(id,so.ctypes)
-def RM_GetNthSelectedOutputColumnCount(id):
-    return libc.RM_GetNthSelectedOutputColumnCount(id)
+    def RM_GetSelectedOutputRowCount(self):
+        return libc.RM_GetSelectedOutputRowCount(self.id)
 
-def RM_GetSelectedOutputCount(id):
-    return libc.RM_GetSelectedOutputCount(id)
+    def RM_GetSICount(self):
+        return libc.RM_GetSICount(self.id)
 
-def RM_GetSelectedOutputHeading(id,icol,heading,length):
-    return libc.RM_GetSelectedOutputHeading(id,icol,heading,length)
-def RM_GetSelectedOutputColumnCount(id):
-    return libc.RM_GetSelectedOutputColumnCount(id)
+    def RM_GetSIName(self,num,name,l1):
+        return libc.RM_GetSIName(self.id,num,name,l1)
 
-def RM_GetSelectedOutputRowCount(id):
-    return libc.RM_GetSelectedOutputRowCount(id)
+    def RM_GetSolidSolutionComponentsCount(self):
+        return libc.RM_GetSolidSolutionComponentsCount(self.id)
 
-def RM_GetSICount(id):
-    return libc.RM_GetSICount(id)
+    def RM_GetSolidSolutionComponentsName(self,num,name,l1):
+        return libc.RM_GetSolidSolutionComponentsName(self.id,num,name,l1)
 
-def RM_GetSIName(id,num,name,l1):
-    return libc.RM_GetSIName(id,num,name,l1)
+    def RM_GetSolidSolutionName(self,num,name,l1):
+        return libc.RM_GetSolidSolutionName(self.id,num,name,l1)
 
-def RM_GetSolidSolutionComponentsCount(id):
-    return libc.RM_GetSolidSolutionComponentsCount(id)
+    def RM_GetSolutionVolume(self,vol):
+        return libc.RM_GetSolutionVolume(self.id,vol.ctypes)
 
-def RM_GetSolidSolutionComponentsName(id,num,name,l1):
-    return libc.RM_GetSolidSolutionComponentsName(id,num,name,l1)
+    def RM_GetSpeciesConcentrations(self,species_conc):
+        return libc.RM_GetSpeciesConcentrations(self.id,species_conc)
 
-def RM_GetSolidSolutionName(id,num,name,l1):
-    return libc.RM_GetSolidSolutionName(id,num,name,l1)
+    def RM_GetSpeciesCount(self):
+        return libc.RM_GetSpeciesCount(self.id)
 
-def RM_GetSolutionVolume(id,vol):
-    return libc.RM_GetSolutionVolume(id,vol.ctypes)
+    def RM_GetSpeciesD25(self,diffc):
+        return libc.RM_GetSpeciesD25(self.id,diffc)
 
-def RM_GetSpeciesConcentrations(id,species_conc):
-    return libc.RM_GetSpeciesConcentrations(id,species_conc)
+    def RM_GetSpeciesLog10Gammas(self,species_log10gammas):
+        return libc.RM_GetSpeciesLog10Gammas(self.id,species_log10gammas)
+    def RM_GetSpeciesName(self,i,name,length):
+        return libc.RM_GetSpeciesName(self.id,i,name,length)
+    def RM_GetSpeciesSaveOn(self):
+        return libc.RM_GetSpeciesSaveOn(self.id)
+    def RM_GetSpeciesZ(self,Z):
+        return libc.RM_GetSpeciesZ(self.id,Z)
+    def RM_GetStartCell(self,sc):
+        return libc.RM_GetStartCell(self.id,sc)
+    def RM_GetSurfaceName(self,num,name,l1):
+        return libc.RM_GetSurfaceName(self.id,num,name,l1)
+    def RM_GetSurfaceType(self,num,name,l1):
+        return libc.RM_GetSurfaceType(self.id,num,name,l1)
+    def RM_GetThreadCount(self):
+        return libc.RM_GetThreadCount(self.id)
+    def RM_GetTime(self):
+        libc.RM_GetTime.restype = c_double
+        return libc.RM_GetTime(self.id)
+    def RM_GetTimeConversion(self):
+        libc.RM_GetTimeConversion.restype = c_double
+        return libc.RM_GetTimeConversion(self.id)
+    def RM_GetTimeStep(self):
+        libc.RM_GetTimeStep.restype = c_double
+        return libc.RM_GetTimeStep(self.id)
+    def RM_InitialPhreeqc2Module(self,ic1,ic2,f1):
+        return libc.RM_InitialPhreeqc2Module(self.id,ic1.ctypes,ic2.ctypes,f1.ctypes)
 
-def RM_GetSpeciesCount(id):
-    return libc.RM_GetSpeciesCount(id)
+    def RM_InitialPhreeqc2Concentrations(self,c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
+    	return libc.RM_InitialPhreeqc2Concentrations(self.id,c.ctypes,n_boundary,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
 
-def RM_GetSpeciesD25(id,diffc):
-    return libc.RM_GetSpeciesD25(id,diffc)
+    def RM_InitialPhreeqc2SpeciesConcentrations(self,species_c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
+        return libc.RM_InitialPhreeqc2SpeciesConcentrations(self.id,species_c.ctypes,n_boundary.ctypes,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
+    def RM_InitialPhreeqcCell2Module(self,n,module_numbers,dim_module_numbers):
+        return libc.RM_InitialPhreeqcCell2Module(self.id,n,module_numbers,dim_module_numbers)
 
-def RM_GetSpeciesLog10Gammas(id,species_log10gammas):
-    return libc.RM_GetSpeciesLog10Gammas(id,species_log10gammas)
-def RM_GetSpeciesName(id,i,name,length):
-    return libc.RM_GetSpeciesName(id,i,name,length)
-def RM_GetSpeciesSaveOn(id):
-    return libc.RM_GetSpeciesSaveOn(id)
-def RM_GetSpeciesZ(id,Z):
-    return libc.RM_GetSpeciesZ(id,Z)
-def RM_GetStartCell(id,sc):
-    return libc.RM_GetStartCell(id,sc)
-def RM_GetSurfaceName(id,num,name,l1):
-    return libc.RM_GetSurfaceName(id,num,name,l1)
-def RM_GetSurfaceType(id,num,name,l1):
-    return libc.RM_GetSurfaceType(id,num,name,l1)
-def RM_GetThreadCount(id):
-    return libc.RM_GetThreadCount(id)
-def RM_GetTime(id):
-    libc.RM_GetTime.restype = c_double
-    return libc.RM_GetTime(id)
-def RM_GetTimeConversion(id):
-    libc.RM_GetTimeConversion.restype = c_double
-    return libc.RM_GetTimeConversion(id)
-def RM_GetTimeStep(id):
-    libc.RM_GetTimeStep.restype = c_double
-    return libc.RM_GetTimeStep(id)
-def RM_InitialPhreeqc2Module(id,ic1,ic2,f1):
-    return libc.RM_InitialPhreeqc2Module(id,ic1.ctypes,ic2.ctypes,f1.ctypes)
+    def RM_LoadDatabase(self,db_name):
+        return libc.RM_LoadDatabase(self.id,db_name.encode())
+    def RM_LogMessage(self,str):
+        return libc.RM_LogMessage(self.id,str.encode())
+    def RM_MpiWorker(self):
+        return libc.RM_MpiWorker(self.id)
+    def RM_MpiWorkerBreak(self):
+        return libc.RM_MpiWorkerBreak(self.id)
+    def RM_OpenFiles(self):
+        return libc.RM_OpenFiles(self.id)
+    def RM_OutputMessage(self,str):
+        return libc.RM_OutputMessage(self.id,str.encode())
+    def RM_RunCells(self):
+        return libc.RM_RunCells(self.id)
+    def RM_RunFile(self,workers,initial_phreeqc,utility,chem_name):
+        return libc.RM_RunFile(self.id,workers,initial_phreeqc,utility,chem_name.encode())
+    def RM_RunString(self,workers,initial_phreeqc,utility,input_string):
+        return libc.RM_RunString(self.id,workers,initial_phreeqc,utility,input_string.encode())
+    def RM_ScreenMessage(self,str):
+        return libc.RM_ScreenMessage(self.id,str.encode())
+    def RM_SetComponentH2O(self,tf):
+        return libc.RM_SetComponentH2O(self.id,tf)
+    def RM_SetConcentrations(self,c):
+        return libc.RM_SetConcentrations(self.id,c.ctypes)
+    def RM_SetCurrentSelectedOutputUserNumber(self,n_user):
+        return libc.RM_SetCurrentSelectedOutputUserNumber(self.id,n_user)
 
-def RM_InitialPhreeqc2Concentrations(id,c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
-	return libc.RM_InitialPhreeqc2Concentrations(id,c.ctypes,n_boundary,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
+    def RM_SetDensity(self,density):
+        return libc.RM_SetDensity (self.id, density.ctypes)
+    def RM_SetDumpFileName(self,dump_name):
+        return libc.RM_SetDumpFileName(self.id,dump_name)
+    def RM_SetErrorHandlerMode(self,mode):
+        return libc.RM_SetErrorHandlerMode(self.id,mode)
+    def RM_SetFilePrefix(self,prefix):
+        return libc.RM_SetFilePrefix(self.id,prefix.encode())
+    def RM_SetMpiWorkerCallbackCookie(self,cookie):
+        return libc.RM_SetMpiWorkerCallbackCookie(self.id,cookie)
+    def RM_SetPartitionUZSolids(self,tf):
+        return libc.RM_SetPartitionUZSolids(self.id,tf)
+    def RM_SetPorosity(self, por):
+        return libc.RM_SetPorosity(self.id, por.ctypes)
+    def RM_SetPressure(self, p):
+        return libc.RM_SetPressure(self.id,p.ctypes)
+    def RM_SetPrintChemistryMask(self, cell_mask):
+        return libc.RM_SetPrintChemistryMask(self.id, cell_mask.ctypes)
+    def RM_SetPrintChemistryOn(self,workers,initial_phreeqc,utility):
+        return libc.RM_SetPrintChemistryOn(self.id,workers,initial_phreeqc,utility)
+    def RM_SetRebalanceByCell(self,method):
+        return libc.RM_SetRebalanceByCell(self.id,method)
+    def RM_SetRebalanceFraction(self,f):
+        return libc.RM_SetRebalanceFraction(self.id,c_double(f))
+    def RM_SetRepresentativeVolume(self,rv):
+        return libc.RM_SetRepresentativeVolume(self.id,rv.ctypes)
+    def RM_SetSaturation(self,sat):
+        return libc.RM_SetSaturation(self.id,sat.ctypes)
+    def RM_SetScreenOn(self,tf):
+        return libc.RM_SetScreenOn(self.id,tf)
+    def RM_SetSelectedOutputOn(self,selected_output):
+        return libc.RM_SetSelectedOutputOn(self.id,selected_output)
+    def RM_SetSpeciesSaveOn(self,save_on):
+        return libc.RM_SetSpeciesSaveOn(self.id,save_on)
+    def RM_SetTemperature(self,t):
+        return libc.RM_SetTemperature(self.id,t.ctypes)
+    def RM_SetTime(self,time):
+        return libc.RM_SetTime(self.id,c_double(time))
+    def RM_SetTimeConversion(self,conv_factor):
+        return libc.RM_SetTimeConversion(self.id,c_double(conv_factor))
+    def RM_SetTimeStep(self,time_step):
+        return libc.RM_SetTimeStep(self.id,c_double(time_step))
 
-def RM_InitialPhreeqc2SpeciesConcentrations(id,species_c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
-    return libc.RM_InitialPhreeqc2SpeciesConcentrations(id,species_c.ctypes,n_boundary.ctypes,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
-def RM_InitialPhreeqcCell2Module(id,n,module_numbers,dim_module_numbers):
-    return libc.RM_InitialPhreeqcCell2Module(id,n,module_numbers,dim_module_numbers)
+    def RM_SetUnitsExchange(self,option):
+        return libc.RM_SetUnitsExchange(self.id,option)
 
-def RM_LoadDatabase(id,db_name):
-    return libc.RM_LoadDatabase(id,db_name.encode())
-def RM_LogMessage(id,str):
-    return libc.RM_LogMessage(id,str.encode())
-def RM_MpiWorker(id):
-    return libc.RM_MpiWorker(id)
-def RM_MpiWorkerBreak(id):
-    return libc.RM_MpiWorkerBreak(id)
-def RM_OpenFiles(id):
-    return libc.RM_OpenFiles(id)
-def RM_OutputMessage(id,str):
-    return libc.RM_OutputMessage(id,str.encode())
-def RM_RunCells(id):
-    return libc.RM_RunCells(id)
-def RM_RunFile(id,workers,initial_phreeqc,utility,chem_name):
-    return libc.RM_RunFile(id,workers,initial_phreeqc,utility,chem_name.encode())
-def RM_RunString(id,workers,initial_phreeqc,utility,input_string):
-    return libc.RM_RunString(id,workers,initial_phreeqc,utility,input_string.encode())
-def RM_ScreenMessage(id,str):
-    return libc.RM_ScreenMessage(id,str.encode())
-def RM_SetComponentH2O(id,tf):
-    return libc.RM_SetComponentH2O(id,tf)
-def RM_SetConcentrations(id,c):
-    return libc.RM_SetConcentrations(id,c.ctypes)
-def RM_SetCurrentSelectedOutputUserNumber(id,n_user):
-    return libc.RM_SetCurrentSelectedOutputUserNumber(id,n_user)
+    def RM_SetUnitsGasPhase(self,option):
+        libc.RM_SetUnitsGasPhase(self.id,option)
 
-def RM_SetDensity(id,density):
-    return libc.RM_SetDensity (id, density.ctypes)
-def RM_SetDumpFileName(id,dump_name):
-    return libc.RM_SetDumpFileName(id,dump_name)
-def RM_SetErrorHandlerMode(id,mode):
-    return libc.RM_SetErrorHandlerMode(id,mode)
-def RM_SetFilePrefix(id,prefix):
-    return libc.RM_SetFilePrefix(id,prefix.encode())
-def RM_SetMpiWorkerCallbackCookie(id,cookie):
-    return libc.RM_SetMpiWorkerCallbackCookie(id,cookie)
-def RM_SetPartitionUZSolids(id,tf):
-    return libc.RM_SetPartitionUZSolids(id,tf)
-def RM_SetPorosity(id, por):
-    return libc.RM_SetPorosity(id, por.ctypes)
-def RM_SetPressure(id, p):
-    return libc.RM_SetPressure(id,p.ctypes)
-def RM_SetPrintChemistryMask(id, cell_mask):
-    return libc.RM_SetPrintChemistryMask(id, cell_mask.ctypes)
-def RM_SetPrintChemistryOn(id,workers,initial_phreeqc,utility):
-    return libc.RM_SetPrintChemistryOn(id,workers,initial_phreeqc,utility)
-def RM_SetRebalanceByCell(id,method):
-    return libc.RM_SetRebalanceByCell(id,method)
-def RM_SetRebalanceFraction(id,f):
-    return libc.RM_SetRebalanceFraction(id,c_double(f))
-def RM_SetRepresentativeVolume(id,rv):
-    return libc.RM_SetRepresentativeVolume(id,rv.ctypes)
-def RM_SetSaturation(id,sat):
-    return libc.RM_SetSaturation(id,sat.ctypes)
-def RM_SetScreenOn(id,tf):
-    return libc.RM_SetScreenOn(id,tf)
-def RM_SetSelectedOutputOn(id,selected_output):
-    return libc.RM_SetSelectedOutputOn(id,selected_output)
-def RM_SetSpeciesSaveOn(id,save_on):
-    return libc.RM_SetSpeciesSaveOn(id,save_on)
-def RM_SetTemperature(id,t):
-    return libc.RM_SetTemperature(id,t.ctypes)
-def RM_SetTime(id,time):
-    return libc.RM_SetTime(id,c_double(time))
-def RM_SetTimeConversion(id,conv_factor):
-    return libc.RM_SetTimeConversion(id,c_double(conv_factor))
-def RM_SetTimeStep(id,time_step):
-    return libc.RM_SetTimeStep(id,c_double(
-    ))
+    def RM_SetUnitsKinetics(self,option):
+        libc.RM_SetUnitsKinetics(self.id,option)
 
-def RM_SetUnitsExchange(id,option):
-    return libc.RM_SetUnitsExchange(id,option)
+    def RM_SetUnitsPPassemblage(self,option):
+        return libc.RM_SetUnitsPPassemblage(self.id,option)
 
-def RM_SetUnitsGasPhase(id,option):
-    libc.RM_SetUnitsGasPhase(id,option)
+    def RM_SetUnitsSolution(self,option):
+        return libc.RM_SetUnitsSolution(self.id,option)
 
-def RM_SetUnitsKinetics(id,option):
-    libc.RM_SetUnitsKinetics(id,option)
+    def RM_SetUnitsSSassemblage(self,option):
+        return libc.RM_SetUnitsSSassemblage(self.id,option)
+    def RM_SetUnitsSurface(self,option):
+        return libc.RM_SetUnitsSurface(self.id,option)
 
-def RM_SetUnitsPPassemblage(id,option):
-    return libc.RM_SetUnitsPPassemblage(id,option)
+    def RM_SpeciesConcentrations2Module(self,species_conc):
+        return libc.RM_SpeciesConcentrations2Module(self.id,species_conc)
 
-def RM_SetUnitsSolution(id,option):
-    return libc.RM_SetUnitsSolution(id,option)
+    def RM_UseSolutionDensityVolume(self,tf):
+        return libc.RM_UseSolutionDensityVolume(self.id,tf)
 
-def RM_SetUnitsSSassemblage(id,option):
-    return libc.RM_SetUnitsSSassemblage(id,option)
+    def RM_WarningMessage(self,warn_str):
+        return libc.RM_WarningMessage(self.id,warn_str)
+    def RM_GetComponentCount(self):
+        return libc.RM_GetComponentCount(self.id)
 
-def RM_SetUnitsSurface(id,option):
-    return libc.RM_SetUnitsSurface(id,option)
+    def returnSelectedOutput(self):
+        selectedOutput = []
+        for isel in range(libc.RM_GetSelectedOutputCount(self.id)):
+           #Loop through possible multiple selected output definitions
+            n_user = libc.RM_GetNthSelectedOutputUserNumber(self.id,isel)
+            status = libc.RM_SetCurrentSelectedOutputUserNumber(self.id,n_user)
+            col = libc.RM_GetSelectedOutputColumnCount(self.id)
+            so = np.zeros(col*self.nxyz).reshape(self.nxyz, col)
+            status= libc.RM_GetSelectedOutput(self.id,so.ctypes)
+            headings = np.zeros(col,dtype='U20')
 
-def RM_SpeciesConcentrations2Module(id,species_conc):
-    return libc.RM_SpeciesConcentrations2Module(id,species_conc)
-
-def RM_UseSolutionDensityVolume(id,tf):
-    return libc.RM_UseSolutionDensityVolume(id,tf)
-
-def RM_WarningMessage(id,warn_str):
-    return libc.RM_WarningMessage(id,warn_str)
-def RM_GetComponentCount(id):
-    return libc.RM_GetComponentCount(id)
+            for j in range(col):
+                String = create_string_buffer(20)
+                status = libc.RM_GetSelectedOutputHeading(self.id,j,String,20)
+                headings[j] = String.value.decode()
+            selectedOutput.append(pd.DataFrame(so,columns=headings))
+            return selectedOutput
