@@ -1,0 +1,79 @@
+
+SOLUTION 0
+units mol/l
+pH 7
+ S(6)            0.03
+ Acetate   1e-2  #there is no Lactate defined in the Minteq; however, Acetate data was changed to represent Lactate
+ N(-3) 3e-3
+ C 1
+ S(-2) 0.0000001
+ Biomass 7.5e-5
+ #Acetate     7.5e-5
+ #Benzoate    7.5e-5
+ #N            0.0175
+ END
+SOLUTION 1-100
+units mol/l
+pH 7
+ S(6)            1e-6
+ Acetate   .01  #there is no Lactate defined in the Minteq; however, Acetate data was changed to represent Lactate
+ N(-3) 3e-3
+ C 1
+ S(-2) 0.0000001
+ Biomass 7.5e-5
+ #Acetate     7.5e-5
+ #Benzoate    7.5e-5
+ #N            0.0175
+ END
+RATES
+#
+  Acetate-
+   -start
+  10 mumax = 7e-5
+#  10 mumax=0
+  20 Ks = 1e-4
+  30 Ka = 5e-3
+  40 f1 = MOL("Acetate-")/(Ks + MOL("Acetate-"))
+  50 if MOL("Acetate-")<0 then f1=0
+  60 f2 = MOL("SO4-2")/(Ka + MOL("SO4-2"))
+  70 if MOL("SO4-2")<0 then f2=0
+  80 rate = mumax * MOL("Biomass") * f1 * f2
+  90 moles = rate * TIME
+  100 PUT(rate,1)
+  110 SAVE moles
+   -end
+# here we develope the rate for the anabolic reaction
+
+SO4-2
+-start
+
+140 rate = GET(1)
+150 moles = rate * TIME
+160 SAVE moles
+   -end
+
+
+
+
+
+  KINETICS 1-100
+
+
+SO4-2
+    -formula Acetate -1/0.2952401136520172 O 2/0.2952401136520172 H 3/0.2952401136520172 C 2/0.2952401136520172
+
+
+Acetate-
+  -formula Acetate -0.525 N -0.2 H -0.225 C 0.05 O 0.55 Biomass 1
+  -m 0
+
+
+-cvode true
+#-steps 360000 second in 1000 steps
+#INCREMENTAL_REACTIONS true
+
+###
+SELECTED_OUTPUT
+        -file   azizam.sel
+        -reset true
+-mol HS- Acetate-
