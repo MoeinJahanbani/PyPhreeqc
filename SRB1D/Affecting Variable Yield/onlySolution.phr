@@ -1,0 +1,32 @@
+
+SOLUTION 0
+units mol/l
+pH 7
+ S(6)            0.03
+ Acetate   1e-2  #there is no Lactate defined in the Minteq; however, Acetate data was changed to represent Lactate
+ N(-3) 3e-3
+ C 1
+ S(-2) 0.0000001
+ Biomass 7.5e-5
+ #Acetate     7.5e-5
+ #Benzoate    7.5e-5
+ #N            0.0175
+ END
+SOLUTION 1-100
+units mol/l
+pH 7
+ S(6)            1e-6
+ Acetate   .01  #there is no Lactate defined in the Minteq; however, Acetate data was changed to represent Lactate
+ N(-3) 3e-3
+ C 1
+ S(-2) 0.0000001
+ Biomass 7.5e-5
+ #Acetate     7.5e-5
+ #Benzoate    7.5e-5
+ #N            0.0175
+ END
+ SELECTED_OUTPUT
+         -file   azizam.sel
+         -reset true
+ -mol HS- Acetate-
+ -activities HS- HCO3- SO4-2 Acetate- H2O H+ NH4+
